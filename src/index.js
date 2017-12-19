@@ -12,7 +12,7 @@ import { objType, createElement, cloneNode, unitConvert } from './utils.js';
  *    'image' ('type' and 'quality'), and 'html2canvas' / 'jspdf', which are
  *    sent as settings to their corresponding functions.
  */
-var html2pdf = function(source, opt) {
+var html2pdf = function(source, opt, callback) {
   // Handle input.
   opt = objType(opt) === 'object' ? opt : {};
   var source = html2pdf.parseInput(source, opt);
@@ -53,7 +53,7 @@ var html2pdf = function(source, opt) {
   opt.html2canvas.onrendered = function(canvas) {
     onRendered(canvas);
     document.body.removeChild(overlay);
-    html2pdf.makePDF(canvas, pageSize, opt);
+    html2pdf.makePDF(canvas, pageSize, opt, callback);
   }
   html2canvas(container, opt.html2canvas);
 };
@@ -137,7 +137,7 @@ html2pdf.makeContainer = function(source, pageSize) {
   return container;
 };
 
-html2pdf.makePDF = function(canvas, pageSize, opt) {
+html2pdf.makePDF = function(canvas, pageSize, opt, callback) {
   // Calculate the number of pages.
   var ctx = canvas.getContext('2d');
   var pxFullHeight = canvas.height;
@@ -186,7 +186,8 @@ html2pdf.makePDF = function(canvas, pageSize, opt) {
       });
     }
   }
-
+  if (typeof callback === 'function')
+    return callback( pdf.output('blob') );
   // Finish the PDF.
   pdf.save( opt.filename );
 }
