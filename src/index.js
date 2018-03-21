@@ -50,10 +50,15 @@ var html2pdf = function(source, opt, callback) {
 
   // Render the canvas and pass the result to makePDF.
   var onRendered = opt.html2canvas.onrendered || function() {};
+  var isRendered = false;
   opt.html2canvas.onrendered = function(canvas) {
     onRendered(canvas);
-    document.body.removeChild(overlay);
-    html2pdf.makePDF(canvas, pageSize, opt, callback);
+    if (document.contains(overlay))
+      document.body.removeChild(overlay);
+    if (!isRendered) {
+      isRendered = true;
+      html2pdf.makePDF(canvas, pageSize, opt, callback);
+    }
   }
   html2canvas(container, opt.html2canvas);
 };
